@@ -14,5 +14,6 @@ class MyMember extends Member
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+        return $fields;
     }
 }
