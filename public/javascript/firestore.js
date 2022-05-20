@@ -229,6 +229,7 @@ function renderChat(to, chatList) {
             placeholder="message ..."
             name="message"
             id="message"
+            autofocus
           />
         </div>
         <div class="col-auto">

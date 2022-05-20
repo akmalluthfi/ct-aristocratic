@@ -86,10 +86,15 @@ async function startChat(email, message) {
     // cari element ubah isinya
     if (!messages.empty) {
       $('.chat').html(renderChat(messages.docs[0].data().to, chatList));
+
       $('.chat').addClass('login');
+
       // auto scroll bottom
       const element = $('div.chat-content');
       $(element).scrollTop($('ul', element).height());
+
+      // auto focus pada input
+      $('form#message input').focus();
     }
 
     // auto scroll bottom

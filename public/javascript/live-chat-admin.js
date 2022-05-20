@@ -87,6 +87,9 @@ async function renderUIChat(email) {
   // cari element ubah isinya
   $('.content-wrapper').html(renderChat(email, chatList));
 
+  // auto focus pada input
+  $('form#message input').focus();
+
   // auto scroll bottom
   const element = $('div.chat-content');
   $(element).scrollTop($('ul', element).height());
