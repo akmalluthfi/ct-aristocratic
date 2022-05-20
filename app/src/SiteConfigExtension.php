@@ -5,11 +5,12 @@ namespace App\Web;
 use App\Web\Social;
 use App\Web\HeaderInfo;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Control\Director;
 
 class SiteConfigExtension extends DataExtension
 {
@@ -19,6 +20,14 @@ class SiteConfigExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
+        // var_dump();
+        // die();
+
+        $fields->addFieldToTab(
+            'Root.Chat',
+            $literal = LiteralField::create('Chat', '<iframe src="layout/chat.html" title="W3Schools Free Online Web Tutorials" style="width:100%; height:450px;border:none;"></iframe>')
+        );
+
         $fields->addFieldToTab('Root.Main', TextareaField::create('FooterContent', 'Content for footer'));
 
         $fields->addFieldToTab(

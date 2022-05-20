@@ -1,5 +1,5 @@
 body {
-    font-family: 'Varela Round', sans-serif;
+    font-family: "Varela Round", sans-serif;
 }
 
 .bg-blue {
@@ -185,7 +185,7 @@ body {
 }
 
 .my-card:hover {
-    box-shadow: 0 .5rem 1rem rgba(black, .15);
+    box-shadow: 0 0.5rem 1rem rgba(black, 0.15);
     border: 2px solid black;
     color: #003344;
 }
@@ -203,4 +203,18 @@ body {
     .icon-desc {
         display: none;
     }
+}
+
+.about-img img {
+    width: 200px;
+    height: 200px;
+    display: inline;
+}
+
+.about-img {
+    display: inline;
+}
+
+.about-img div {
+    display: inline;
 }

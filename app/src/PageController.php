@@ -2,7 +2,10 @@
 
 namespace {
 
+    use SilverStripe\GraphQL\Controller as graph;
     use SilverStripe\CMS\Controllers\ContentController;
+    use SilverStripe\Control\HTTPResponse;
+    use SilverStripe\Security\Security;
     use SilverStripe\View\Requirements;
 
     class PageController extends ContentController
@@ -31,12 +34,21 @@ namespace {
             // See: https://docs.silverstripe.org/en/developer_guides/templates/requirements/
             Requirements::css('css/bootstrap.min.css');
             Requirements::css('css/style.css');
+            Requirements::css('css/style-chat.css');
             Requirements::css('css/iziModal.min.css');
+
+            // Require Firebase Firestore
+            Requirements::javascript('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
+            Requirements::javascript('https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js');
+
             Requirements::javascript('javascript/jquery.js');
             Requirements::javascript('javascript/bootstrap.min.js');
             Requirements::javascript('javascript/sweetalert2.all.min.js');
             Requirements::javascript('javascript/iziModal.min.js');
             Requirements::javascript('javascript/script.js');
+
+            Requirements::javascript('javascript/firestore.js');
+            Requirements::javascript('javascript/live-chat-user.js');
         }
 
         public function setFlash($icon, $title, $text)

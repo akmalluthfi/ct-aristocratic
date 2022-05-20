@@ -1,0 +1,47 @@
+Buat live chat (Firestore)
+
+buat collection chats 
+dengan document email yang dimasukkan oleh user 
+didalamnya terdapat chat dia dengan admin
+
+// masukkan data dari user 
+chats.{email}.message.{
+  id: auto_id, 
+  from: user, 
+  to: admin, 
+  msg: message
+}
+
+chats.{email}.message.{
+  id: auto_id, 
+  from: admin, 
+  to: user, 
+  msg: message
+}
+
+
+
+
+
+
+
+
+
+
+
+collection.messages/document = {
+  id: int -> Auto_ID, 
+  created: timestamp -> firebase.firestore.Timestamp.now().toDate()
+  from: string -> unique /from || admin
+  message: string 
+}
+
+
+jika user pertama kali masuk website: 
+jika ingin mengirimkan pesan masukkan input email dan pesan yang mau dikirimkan, 
+
+cek apakah ada email tersebut, jika ada, hapus email
+
+lalu mulai chat dengan admin
+
+

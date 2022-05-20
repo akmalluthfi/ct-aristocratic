@@ -5,7 +5,7 @@ SilverStripe\Core\Manifest\ModuleManifest:
   project: app
 
 App\Web\BlogHolder:
-  allowed_children: 
+  allowed_children:
     - App\Web\PostPage
 
 # UTF8MB4 has limited support in older MySQL versions.
@@ -20,6 +20,12 @@ SilverStripe\ORM\Connect\MySQLDatabase:
   collation: utf8mb4_unicode_ci
 
 # Extension
-SilverStripe\SiteConfig\SiteConfig: 
+SilverStripe\SiteConfig\SiteConfig:
   extensions:
-    - App\Web\SiteConfigExtension 
+    - App\Web\SiteConfigExtension
+
+# CORS
+SilverStripe\GraphQL\Controller:
+  cors:
+    Enabled: true
+    Allow-Origin: '*'

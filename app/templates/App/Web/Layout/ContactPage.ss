@@ -51,3 +51,7 @@
     </div>
 </div>
 <%-- Contact End --%>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<%-- Google Platform for login --%>
+<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>

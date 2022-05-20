@@ -1,39 +1,8 @@
 <!-- Jumbotron Begin -->
-<div class="hero-img"
-    style="background: linear-gradient(rgba(0, 51, 68, 0.788), rgba(0, 51, 68, 0.6)), url('$Banner.Link');">
-    <div class="container h-100">
-        <div class="h-100 d-flex align-items-center">
-            <div class="col-12 col-md-6 text-white">
-                <h2 class="fw-max">$SubTitle</h2>
-                <p>$Content</p>
-                <a href="#about-us" class="mt-4 me-3 text-uppercase rounded-none btn text-white bg-green fw-bold py-2 px-4 fs-sm border-2-green">Learn More</a>
-                <a href="<% with $Page(contact-us) %>$Link<% end_with %>" class="mt-4 text-uppercase rounded-none btn text-white bg-green fw-bold py-2 px-4 fs-sm border-2-green">Contact Us</a>
-            </div>
-        </div>
-    </div>
-</div>
+<%-- $ElementalArea --%>
 <!-- Jumbotron End -->
 
 <!-- About Us Begin -->
-<div class="container py-5" id="about-us">
-    <div class="row pb-5">
-        <% loop $getAbout %>
-        <div class="col-md-6 col-12 mb-3">
-            <h3 class="text-uppercase fw-max color-blue mb-5">$SubTitle</h3>
-            <p>$Content</p>
-            <a href="$Link" class="d-flex align-items-center justify-content-center my-4 mx-2 rounded-none btn text-white bg-green fw-bold fs-sm border-2-green" style="width: 145px;height: 45px;">Read More<i class="ms-3 fas fa-long-arrow-alt-right"></i></a>
-        </div>
-        <div class="col-md-6 col-12 mb-3">
-            <div class="iframe">
-                <div class="container-iframe">
-                    $Iframe.RAW
-                    <div class="iframe-overlay" title="$SubTitle"></div>
-                </div>
-            </div>
-        </div>
-        <% end_loop %>
-    </div>
-</div>
 <!-- About Us End -->
 
 <!-- Service Begin -->
@@ -70,3 +39,48 @@
     </div>
 </div>
 <!-- Service End -->
+
+<%-- Button Live Chat --%>
+<div class="chat-main">
+  <div class="chat close" style="display: none">
+    <div class="chat-header rounded-top p-3">
+      Please fill out the form below to start chatting with the next
+      available agent.
+    </div>
+    <div class="chat-content bg-white border border-top-0 p-4 rounded-bottom">
+      <form class="start-chat" action="">
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            placeholder="name@example.com"
+            name="email"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea class="form-control" id="message" rows="3" name="message" required></textarea>
+        </div>
+        <button class="btn btn-outline-info w-100" type="submit">
+          <i class="fa-solid fa-paper-plane fa-lg"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <button
+    class="btn ms-auto rounded-circle my-3 d-block p-0 border border-dark bg-white"
+    id="btn-start-chat"
+    >
+    <div
+      class="d-flex justify-content-center align-items-center position-relative"
+      style="width: 50px; height: 50px"
+    >
+      <span class="position-absolute top-0 translate-middle badge rounded-pill bg-danger" style="margin-left:-20px;margin-top:5px;"></span>
+      <i class="fa-regular fa-comment-dots fa-xl"></i>
+    </div>
+  </button>
+</div>

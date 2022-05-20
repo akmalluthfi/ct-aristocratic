@@ -14,5 +14,5 @@ class GalleryAdmin extends ModelAdmin
         Gallery::class
     ];
 
-    private static $menu_icon_class = 'font-icon-image';
+    private static $menu_icon_class = 'font-icon-picture';
 }
