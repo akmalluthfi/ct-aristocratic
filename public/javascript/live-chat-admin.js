@@ -4,24 +4,24 @@ $(document).ready(function () {
 
   // load semua user
   // mengembalikan semua user, dan user yang diupdate
-  getUser(async (users, user) => {
+  getUser(async (users, changeEmail) => {
     // buat userList
     let userList = '';
     const docs = users.docs;
-
     // cek jika admin berada ditempat yang sama dengan data yang update
-    if (user !== false) {
+    if (changeEmail) {
       const active = await getWhere('admin');
-      if (active === user.email) {
+      if (active === changeEmail) {
         // render ulang chat
-        await renderUIChat(user.email);
+        await renderUIChat(changeEmail);
       }
     }
 
     for (const doc of docs) {
       const currMessage = await getCurrMessage(doc.ref);
       const unread = doc.data().unread_admin;
-      userList += renderUserItem(doc.id, unread, currMessage);
+      const status = doc.data().status;
+      userList += renderUserItem(doc.id, unread, currMessage, status);
     }
 
     // render userList
@@ -51,11 +51,16 @@ async function handleClick(e) {
   await renderUIChat(email);
 }
 
-function renderUserItem(email, unread, currMessage) {
-  const status =
+function renderUserItem(email, unread, currMessage, status) {
+  const badge_unread =
     unread === 0
       ? ''
       : `<span class="badge rounded-pill bg-danger float-end">${unread}</span></p>`;
+
+  const badge_status =
+    status == 'deleted'
+      ? `<span class="badge rounded-pill bg-danger float-end">${status}</span></p>`
+      : '';
 
   const dots = currMessage.length > 17 ? '...' : '';
 
@@ -69,7 +74,7 @@ function renderUserItem(email, unread, currMessage) {
       </div>
       <div class="p-0 col user-detail">
         <p class="pe-3 m-0"><span>${email}</span>
-        ${status}
+        ${badge_unread}${badge_status}
         <h6 class="p-0 m-0">${currMessage.substring(0, 17) + dots}</h6>
       </div>
     </div>
@@ -81,18 +86,35 @@ async function renderUIChat(email) {
 
   let chatList = '';
   messages.forEach((message) => {
-    chatList += renderChatItem(message.data());
+    chatList += renderChatItem(message);
   });
 
   // cari element ubah isinya
   $('.content-wrapper').html(renderChat(email, chatList));
 
-  // auto focus pada input
-  $('form#message input').focus();
-
   // auto scroll bottom
   const element = $('div.chat-content');
   $(element).scrollTop($('ul', element).height());
+
+  const messageDel = await isUserDeleted(email);
+  if (messageDel !== false) {
+    const seconds = messageDel.end_at.toDate();
+    const time = new Date(seconds).toLocaleTimeString('en-GB', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+
+    $('div.chat-content').append(
+      `<div class="text-center mt-4">
+        <button type="button" class="btn btn-outline-secondary w-75" disabled>This chat session has been ended by admin at ${time}</button>
+      </div>`
+    );
+  }
+
+  // auto focus pada input
+  $('form#message input').focus();
 
   // tambahkan event untuk form
   $('form#message').submit(async function (e) {
@@ -104,6 +126,8 @@ async function renderUIChat(email) {
       msg: message.val(),
       from: 'admin',
     });
+
+    message.val('');
   });
 
   // tambahkan event untuk kill chat by admin
@@ -117,21 +141,37 @@ async function renderUIChat(email) {
       confirmButtonColor: '#004e7f',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!',
-    }).then((result) => {
-      if (result.isConfirmed) killChat($(this).data('email'));
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        // cek apakah user sudah didelete
+        const messageDel = await isUserDeleted($(this).data('email'));
+        if (messageDel !== false) {
+          const seconds = messageDel.end_at.toDate();
+          const time = new Date(seconds).toLocaleTimeString('en-GB', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          // tampilkan pesan
+          Swal.fire({
+            icon: 'error',
+            title: 'Sorry, this chat session has ended',
+            text: `this chat session ended at ${time}`,
+          });
+        } else {
+          await killChat($(this).data('email'));
+        }
+      }
     });
   });
 }
 
-function killChat(email) {
-  // buat date
-  const today = new Date();
-  const date =
-    today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-  const time =
-    today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-  const dateTime = 'end' + date + 'at' + time;
-
-  // ganti id email diatas dengan email
-  console.log(dateTime);
+async function killChat(email) {
+  // buat chat dengan format khusus
+  await endChat(email);
+  console.log('berhasil membuat pesan baru pesan baru');
+  // ubah status user menjadi deleted
+  await changeToDeleted(email);
+  console.log('berhasil mengubah status menjadi deleted');
 }

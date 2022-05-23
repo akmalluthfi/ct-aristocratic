@@ -48,31 +48,25 @@ $(document).ready(function () {
 });
 
 async function startChat(email, message) {
-  // hapus semua chat user / meskipun user tersebut tidak ada
-  await deleteUserMessages(email);
-
-  // tambahkan user, timpa jika ada, buat baru jika belum ada
-  await addUser(email);
+  // tentukan cara pembuatan user, dan mengembalikan email baru
+  const newEmail = await createUser(email);
 
   // set default value
   setWhere('stay', 'user');
 
   // lalu tambahkan message;
-  await addMessage(email, { msg: message, from: 'user' });
+  await addMessage(newEmail, { msg: message, from: 'user' });
 
   // set window userLogin
-  window.userLogin = email;
+  window.userLogin = newEmail;
 
   // dapatkan data user chat
-  getSnapshotMessages(email, async (messages) => {
+  getSnapshotMessages(newEmail, async (messages, endMessage) => {
     // render ulang tampilan chat
     let chatList = '';
     messages.forEach((message) => {
-      chatList += renderChatItem(message.data());
-      // console.log(message);
+      chatList += renderChatItem(message);
     });
-
-    console.log('huh? updated');
 
     // cek jika user sudah login dan element chat mempunyai class close
     if ($('.chat').hasClass('close')) {
@@ -84,8 +78,8 @@ async function startChat(email, message) {
     }
 
     // cari element ubah isinya
-    if (!messages.empty) {
-      $('.chat').html(renderChat(messages.docs[0].data().to, chatList));
+    if (messages) {
+      $('.chat').html(renderChat(messages[0].to, chatList));
 
       $('.chat').addClass('login');
 
@@ -95,6 +89,33 @@ async function startChat(email, message) {
 
       // auto focus pada input
       $('form#message input').focus();
+    }
+
+    // cek apakah chat telah berakhir
+    if (endMessage) {
+      const seconds = endMessage.end_at.toDate();
+      const time = new Date(seconds).toLocaleTimeString('en-GB', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      $('div.chat-content').append(
+        `<div class="text-center mt-4">
+          <button type="button" class="btn btn-outline-secondary w-75" disabled>
+            <small>This chat session has been ended by admin at ${time}</small>
+          </button>
+          <button type="button" class="btn btn-outline-secondary w-75 mt-2" disabled>
+            <small>You can start a new chat by refreshing the page</small>
+          </button>
+        </div>`
+      );
+
+      // matikan input pada form
+      const form = $('form#message');
+      $('input', form).attr('disabled', 'disabled');
+      $('button', form).attr('disabled', 'disabled');
     }
 
     // auto scroll bottom
@@ -107,7 +128,41 @@ async function startChat(email, message) {
 
       const message = $('input#message');
 
-      await addMessage(email, { msg: message.val(), from: 'user' });
+      await addMessage(newEmail, { msg: message.val(), from: 'user' });
     });
   });
+}
+
+async function createUser(email) {
+  // cek apakah user dengan email=email dan status=active
+
+  // jika ada hapus, lalu buat baru
+  // jika tidak ada, buat/timpa jika ada
+
+  const { exists, isActive, user } = await isUserExists(email);
+
+  if (exists === false) {
+    // buat baru
+    // tambahkan user, buat baru jika belum ada
+    await addUser(email, email);
+    // console.log('buat email baru pertama dan return email', email);
+    return email;
+  }
+
+  if (exists == true && isActive == true) {
+    // timpa (hapus pesan terlebih dahulu)
+    // console.log('menimpa user dengan email', user.id);
+    await deleteUserMessages(user.id);
+    await addUser(user.id, email);
+    return user.id;
+  } else {
+    // buat user dengan user_1++
+    let [oldEmail, count = 0] = user.id.split('_');
+    count = parseInt(count);
+    const newEmail = `${oldEmail}_${count + 1}`;
+
+    addUser(newEmail, email);
+    return newEmail;
+    // console.log('menambah user baru dengan email', newEmail);
+  }
 }

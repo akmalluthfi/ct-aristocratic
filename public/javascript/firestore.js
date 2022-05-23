@@ -17,14 +17,38 @@ const db = firebase.firestore();
 // dbRef
 const chatsRef = db.collection('chats');
 
-// cek apakah user sudah terdaftar atau belum
-// return true if exist, false if does not exists
+// buat function untuk mencari user dengan email=email dan status=delete
+// jika ada return user tersebut
+// jika tidak ada
 function isUserExists(email) {
   return chatsRef
-    .doc(email)
+    .where('email', '==', email)
+    .orderBy('created_at', 'desc')
     .get()
-    .then((doc) => {
-      return doc.exists;
+    .then((users) => {
+      // cek apakah user sudah ada
+      if (users.empty) {
+        return { exists: false, isActive: false, user: null };
+      } else {
+        // jika user sudah ada, cek status
+        let userDeleted = [];
+        let userActive;
+        users.forEach((user) => {
+          if (user.data().status === 'active') {
+            userActive = user;
+          } else {
+            userDeleted.push(user);
+          }
+        });
+
+        // cek jika ada userActive
+        if (userActive !== undefined) {
+          return { exists: true, isActive: true, user: userActive };
+        } else {
+          // kembalikan user delete yang paling baru
+          return { exists: true, isActive: false, user: userDeleted[0] };
+        }
+      }
     });
 }
 
@@ -60,13 +84,14 @@ async function deleteUserMessages(email) {
 }
 
 // function add User()
-async function addUser(email) {
-  await chatsRef.doc(email).set({
+async function addUser(id, email) {
+  await chatsRef.doc(id).set({
     email: email,
     updated_at: firebase.firestore.Timestamp.now(),
     created_at: firebase.firestore.Timestamp.now(),
     unread_admin: 0,
     unread_user: 0,
+    status: 'active',
   });
 }
 
@@ -137,9 +162,21 @@ function getSnapshotMessages(email, callback) {
           if (change.type === 'modified') {
             isNotModified = false;
           }
+          // console.log(change, change.type);
         });
 
-        if (isNotModified) callback(querySnaphot);
+        let messages = [];
+        let endMessage = false;
+        // ambil pesan yang bukan end
+        querySnaphot.forEach((message) => {
+          if (message.data().end_at) {
+            endMessage = message.data();
+          } else {
+            messages.push(message.data());
+          }
+        });
+
+        if (isNotModified) callback(messages, endMessage);
       },
       (error) => {
         console.log(error);
@@ -150,7 +187,21 @@ function getSnapshotMessages(email, callback) {
 // untuk mendapatkan data baru tanpa snapshot
 // return messages
 function getMessages(email) {
-  return chatsRef.doc(email).collection('messages').orderBy('created_at').get();
+  return chatsRef
+    .doc(email)
+    .collection('messages')
+    .orderBy('created_at')
+    .get()
+    .then((messages) => {
+      let filteredMessages = [];
+      messages.forEach((message) => {
+        if (!message.data().by) {
+          filteredMessages.push(message.data());
+        }
+      });
+
+      return filteredMessages;
+    });
 }
 
 // dapatkan semua user
@@ -160,8 +211,7 @@ function getUser(callback) {
       let userChange = false;
       querySnapshot.docChanges().forEach((change) => {
         if (change.type === 'modified') {
-          // return change.doc.data();
-          userChange = change.doc.data();
+          userChange = change.doc.id;
         }
       });
 
@@ -204,6 +254,7 @@ function renderChat(to, chatList) {
       </div>
     `;
   }
+
   return /* html */ `
   <div class="col-auto chat-header rounded-top p-2">
     <div class="row align-items-center">
@@ -223,13 +274,13 @@ function renderChat(to, chatList) {
     <form id="message" action="">
       <div class="row">
         <div class="col">
+        <!-- ubah input menjadi disabled -->
           <input
             type="text"
             class="form-control"
             placeholder="message ..."
             name="message"
             id="message"
-            autofocus
           />
         </div>
         <div class="col-auto">
@@ -307,10 +358,59 @@ async function getUnreadUser(email) {
 
 // function to get current message from user
 function getCurrMessage(userRef) {
-  return userRef
-    .collection('messages')
-    .orderBy('created_at', 'desc')
-    .limit(1)
+  return (
+    userRef
+      .collection('messages')
+      .orderBy('created_at', 'desc')
+      .limit(2)
+      .get()
+      // .then((messages) => messages.docs[0].data().msg);
+      .then((messages) => {
+        // cek jika pesan terbaru adalah undefined
+        let last = messages.docs[0].data().msg;
+        messages.forEach((message) => {
+          // console.log(message.data());
+          if (message.data().end_at) last = messages.docs[1].data().msg;
+        });
+
+        return last;
+      })
+  );
+}
+
+function isUserDeleted(email) {
+  return chatsRef
+    .doc(email)
     .get()
-    .then((messages) => messages.docs[0].data().msg);
+    .then(async (doc) => {
+      // console.log(doc.data());
+      if (doc.data().status === 'deleted') {
+        const message = await doc.ref
+          .collection('messages')
+          .where('by', '==', 'Admin')
+          .get()
+          .then((messages) => messages.docs[0].data());
+
+        return message;
+      }
+
+      return false;
+    });
+}
+
+function changeToDeleted(email) {
+  return chatsRef.doc(email).update({
+    status: 'deleted',
+  });
+}
+
+async function endChat(email) {
+  // tambahkan pesan dengan format
+  await chatsRef.doc(email).collection('messages').add({
+    end_at: firebase.firestore.Timestamp.now(),
+    created_at: firebase.firestore.Timestamp.now(),
+    by: 'Admin',
+  });
+
+  return true;
 }
