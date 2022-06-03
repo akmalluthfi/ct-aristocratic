@@ -37,9 +37,9 @@
     <!-- Font Awasome Kits -->
     <script src="https://kit.fontawesome.com/cdf3502273.js" crossorigin="anonymous"></script>
     <!-- RECAPTCHA Script -->
-    <%-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> --%>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <%-- Google Platform for login --%>
-    <%-- <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script> --%>    
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>   
 </body>
 
 </html>
