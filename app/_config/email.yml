@@ -1,5 +1,5 @@
 # See https://docs.silverstripe.org/en/4/developer_guides/email/ for additional information about setting up email
----
+# ---
 # Name: project-emailconfig
 # After:
 #   - '#emailconfig'
@@ -7,11 +7,11 @@
 # SilverStripe\Core\Injector\Injector:
 #   Swift_Transport:
 #     class: Swift_SmtpTransport
-#     properties: 
+#     properties:
 #       Host: smtp.gmail.com
 #       Port: 587
 #       Encryption: tls
-#     calls: 
-#       Username: [ setUsername, ['mrx191204@gmail.com'] ]
-#       Password: [ setPassword, ['fr13nds76'] ]
-#       AuthMode: [ setAuthMode, ['login'] ]
+#     calls:
+#       Username: [setUsername, ['mrx191204@gmail.com']]
+#       Password: [setPassword, ['fr13nds76']]
+#       AuthMode: [setAuthMode, ['login']]
